@@ -165,7 +165,7 @@
 
       // ensure to is of type 'number'
       to = typeof to !== 'number' ? parseInt(to, 10) : to;
-      
+
       // do nothing if already on requested slide
       if (index === to) {
         return;
@@ -417,6 +417,15 @@
           // stop slideshow
           stop();
 
+          // determine if slide attempt is past start and end
+          var isPastBounds =
+            !index && delta.x > 0 ||                      // if first slide and slide amt is greater than 0
+            index === slides.length - 1 && delta.x < 0;   // or if last slide and slide amt is less than 0
+
+          if (isPastBounds && options.lockBoundaries) {
+            return
+          }
+
           // increase resistance if first or last slide
           if (options.continuous) { // we don't add resistance at the end
 
@@ -464,11 +473,13 @@
           isPastBounds = false;
         }
 
+        var shouldAbort = isScrolling || (isPastBounds && options.lockBoundaries);
+
         // determine direction of swipe (true:right, false:left)
         var direction = delta.x < 0;
 
         // if not scrolling vertically
-        if (!isScrolling) {
+        if (!shouldAbort) {
 
           if (isValidSlide && !isPastBounds) {
 
